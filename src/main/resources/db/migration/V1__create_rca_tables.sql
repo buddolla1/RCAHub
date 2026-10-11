@@ -1,0 +1,48 @@
+CREATE TABLE IF NOT EXISTS rca_incident (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    serial_number BIGINT NULL,
+    incident_number VARCHAR(100) NOT NULL,
+    incident_month TINYINT UNSIGNED NULL,
+    incident_year SMALLINT UNSIGNED NULL,
+    change_ticket VARCHAR(100) NULL,
+    priority VARCHAR(30) NULL,
+    tower VARCHAR(100) NULL,
+    application VARCHAR(150) NULL,
+    program_manager VARCHAR(150) NULL,
+    art_team_name VARCHAR(150) NULL,
+    issue_description TEXT NOT NULL,
+    release_datetime DATETIME NULL,
+    rollback_status VARCHAR(30) NULL,
+    incident_start_time DATETIME NULL,
+    incident_end_time DATETIME NULL,
+    impacted_system VARCHAR(255) NULL,
+    business_impact TEXT NULL,
+    root_cause TEXT NULL,
+    rca_type VARCHAR(30) NULL,
+    remedy_used TEXT NULL,
+    detection_point VARCHAR(30) NULL,
+    preventive_actions TEXT NULL,
+    rca_status VARCHAR(30) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    CONSTRAINT uk_rca_incident_number UNIQUE (incident_number),
+    INDEX idx_rca_incident_filters (rca_status, priority, incident_year, incident_month),
+    INDEX idx_rca_incident_application (application)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS rca_team_action (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    rca_incident_id BIGINT NOT NULL,
+    team_name VARCHAR(50) NOT NULL,
+    learnings TEXT NULL,
+    corrective_actions TEXT NULL,
+    target_completion_date DATE NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_team_action_incident
+        FOREIGN KEY (rca_incident_id) REFERENCES rca_incident (id) ON DELETE CASCADE,
+    CONSTRAINT uk_team_action_incident_team UNIQUE (rca_incident_id, team_name),
+    INDEX idx_team_action_incident (rca_incident_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -1,0 +1,81 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.1.1'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.syf'
+version = '0.0.1-SNAPSHOT'
+description = 'RCAHub'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-mysql'
+
+    runtimeOnly 'com.mysql:mysql-connector-j'
+
+    testImplementation platform('org.testcontainers:testcontainers-bom:2.0.5')
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers-mysql'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+        resources {
+            srcDirs = ['src/main/resources', 'frontend/src/main/resources']
+        }
+    }
+
+}
+
+def frontendDir = file('frontend')
+def frontendNodeModulesDir = file("$frontendDir/node_modules")
+def frontendDistDir = file("$frontendDir/dist")
+def npmExecutable = file('/usr/local/bin/npm').exists() ? '/usr/local/bin/npm' : 'npm'
+
+tasks.register('npmInstallFrontend', Exec) {
+    workingDir frontendDir
+    commandLine npmExecutable, 'install'
+    onlyIf { !frontendNodeModulesDir.exists() }
+}
+
+tasks.register('buildFrontend', Exec) {
+    dependsOn tasks.named('npmInstallFrontend')
+    workingDir frontendDir
+    commandLine npmExecutable, 'run', 'build'
+    inputs.dir frontendDir
+    outputs.dir frontendDistDir
+}
+
+tasks.named('processResources') {
+    dependsOn tasks.named('buildFrontend')
+    from(frontendDistDir) {
+        into 'static'
+    }
+}
+
+tasks.named('bootRun') {
+    dependsOn tasks.named('processResources')
+}
