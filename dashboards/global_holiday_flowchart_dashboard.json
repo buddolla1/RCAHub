@@ -1,0 +1,808 @@
+{
+  "title": "Global Holiday | Flowchart View",
+  "description": "Flowchart-first dashboard for Proxy and Amazon Prequal. Replace YOUR_INDEX and verify event schema. Counts represent log events, not deduplicated requests.",
+  "inputs": {
+    "input_time": {
+      "type": "input.timerange",
+      "title": "Time Range",
+      "options": {
+        "token": "global_time",
+        "defaultValue": "-24h@h,now"
+      }
+    }
+  },
+  "defaults": {
+    "dataSources": {
+      "ds.search": {
+        "options": {
+          "queryParameters": {
+            "earliest": "$global_time.earliest$",
+            "latest": "$global_time.latest$"
+          }
+        }
+      }
+    }
+  },
+  "visualizations": {
+    "heading": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "# Global Holiday Dashboard"
+      }
+    },
+    "label_0_left": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### Synapps Response"
+      }
+    },
+    "label_0_right": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### Synapps Response"
+      }
+    },
+    "start_0": {
+      "type": "splunk.singlevalue",
+      "title": "Proxy Pass 1 Requests",
+      "dataSources": {
+        "primary": "ds_start_0"
+      },
+      "options": {}
+    },
+    "p1_0_0": {
+      "type": "splunk.singlevalue",
+      "title": "Pass 1 \u00b7 Declined",
+      "dataSources": {
+        "primary": "ds_p1_0_0"
+      },
+      "options": {}
+    },
+    "p2_0_0": {
+      "type": "splunk.singlevalue",
+      "title": "Pass 2 \u00b7 Declined",
+      "dataSources": {
+        "primary": "ds_p2_0_0"
+      },
+      "options": {}
+    },
+    "p1_0_1": {
+      "type": "splunk.singlevalue",
+      "title": "Pass 1 \u00b7 Approved",
+      "dataSources": {
+        "primary": "ds_p1_0_1"
+      },
+      "options": {}
+    },
+    "p2_0_1": {
+      "type": "splunk.singlevalue",
+      "title": "Pass 2 \u00b7 Approved",
+      "dataSources": {
+        "primary": "ds_p2_0_1"
+      },
+      "options": {}
+    },
+    "p1_0_2": {
+      "type": "splunk.singlevalue",
+      "title": "Pass 1 \u00b7 Exceptions/Errored",
+      "dataSources": {
+        "primary": "ds_p1_0_2"
+      },
+      "options": {}
+    },
+    "p2_0_2": {
+      "type": "splunk.singlevalue",
+      "title": "Pass 2 \u00b7 Exceptions/Errored",
+      "dataSources": {
+        "primary": "ds_p2_0_2"
+      },
+      "options": {}
+    },
+    "pass2_0": {
+      "type": "splunk.singlevalue",
+      "title": "Proxy Pass 2 Requests",
+      "dataSources": {
+        "primary": "ds_pass2_0"
+      },
+      "options": {}
+    },
+    "left_br_0": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "## \u251c\u2500\u2500\u2192"
+      }
+    },
+    "right_br_0": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "## \u2500\u2500\u2524\u2500\u2500\u2192"
+      }
+    },
+    "offer_label_0": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "**Amazon accept offer \u2192**"
+      }
+    },
+    "offer_0": {
+      "type": "splunk.singlevalue",
+      "title": "Accepted Offers",
+      "dataSources": {
+        "primary": "ds_offer_0"
+      },
+      "options": {}
+    },
+    "flow_top_0": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "\u2197"
+      }
+    },
+    "flow_bottom_0": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "\u2198"
+      }
+    },
+    "flow_top_right_0": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "\u2197"
+      }
+    },
+    "flow_bottom_right_0": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "\u2198"
+      }
+    },
+    "label_1_left": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### Synapps Response"
+      }
+    },
+    "label_1_right": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "### Synapps Response"
+      }
+    },
+    "start_1": {
+      "type": "splunk.singlevalue",
+      "title": "Amazon Prequal Pass 1 Requests",
+      "dataSources": {
+        "primary": "ds_start_1"
+      },
+      "options": {}
+    },
+    "p1_1_0": {
+      "type": "splunk.singlevalue",
+      "title": "Pass 1 \u00b7 Declined",
+      "dataSources": {
+        "primary": "ds_p1_1_0"
+      },
+      "options": {}
+    },
+    "p2_1_0": {
+      "type": "splunk.singlevalue",
+      "title": "Pass 2 \u00b7 Declined",
+      "dataSources": {
+        "primary": "ds_p2_1_0"
+      },
+      "options": {}
+    },
+    "p1_1_1": {
+      "type": "splunk.singlevalue",
+      "title": "Pass 1 \u00b7 Approved",
+      "dataSources": {
+        "primary": "ds_p1_1_1"
+      },
+      "options": {}
+    },
+    "p2_1_1": {
+      "type": "splunk.singlevalue",
+      "title": "Pass 2 \u00b7 Approved",
+      "dataSources": {
+        "primary": "ds_p2_1_1"
+      },
+      "options": {}
+    },
+    "p1_1_2": {
+      "type": "splunk.singlevalue",
+      "title": "Pass 1 \u00b7 Exceptions/Errored",
+      "dataSources": {
+        "primary": "ds_p1_1_2"
+      },
+      "options": {}
+    },
+    "p2_1_2": {
+      "type": "splunk.singlevalue",
+      "title": "Pass 2 \u00b7 Exceptions/Errored",
+      "dataSources": {
+        "primary": "ds_p2_1_2"
+      },
+      "options": {}
+    },
+    "pass2_1": {
+      "type": "splunk.singlevalue",
+      "title": "Amazon Prequal Pass 2 Requests",
+      "dataSources": {
+        "primary": "ds_pass2_1"
+      },
+      "options": {}
+    },
+    "left_br_1": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "## \u251c\u2500\u2500\u2192"
+      }
+    },
+    "right_br_1": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "## \u2500\u2500\u2524\u2500\u2500\u2192"
+      }
+    },
+    "offer_label_1": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "**Amazon accept offer \u2192**"
+      }
+    },
+    "offer_1": {
+      "type": "splunk.singlevalue",
+      "title": "Accepted Offers",
+      "dataSources": {
+        "primary": "ds_offer_1"
+      },
+      "options": {}
+    },
+    "flow_top_1": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "\u2197"
+      }
+    },
+    "flow_bottom_1": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "\u2198"
+      }
+    },
+    "flow_top_right_1": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "\u2197"
+      }
+    },
+    "flow_bottom_right_1": {
+      "type": "splunk.markdown",
+      "options": {
+        "markdown": "\u2198"
+      }
+    }
+  },
+  "dataSources": {
+    "ds_start_0": {
+      "type": "ds.search",
+      "name": "Proxy Pass 1 Requests",
+      "options": {
+        "query": "index=YOUR_INDEX requestType=\"Proxy\" pass=\"1\" | stats count as Count"
+      }
+    },
+    "ds_p1_0_0": {
+      "type": "ds.search",
+      "name": "Pass 1 \u00b7 Declined",
+      "options": {
+        "query": "index=YOUR_INDEX requestType=\"Proxy\" pass=\"1\" status=\"Declined\" | stats count as Count"
+      }
+    },
+    "ds_p2_0_0": {
+      "type": "ds.search",
+      "name": "Pass 2 \u00b7 Declined",
+      "options": {
+        "query": "index=YOUR_INDEX requestType=\"Proxy\" pass=\"2\" status=\"Declined\" | stats count as Count"
+      }
+    },
+    "ds_p1_0_1": {
+      "type": "ds.search",
+      "name": "Pass 1 \u00b7 Approved",
+      "options": {
+        "query": "index=YOUR_INDEX requestType=\"Proxy\" pass=\"1\" status=\"Approved\" | stats count as Count"
+      }
+    },
+    "ds_p2_0_1": {
+      "type": "ds.search",
+      "name": "Pass 2 \u00b7 Approved",
+      "options": {
+        "query": "index=YOUR_INDEX requestType=\"Proxy\" pass=\"2\" status=\"Approved\" | stats count as Count"
+      }
+    },
+    "ds_p1_0_2": {
+      "type": "ds.search",
+      "name": "Pass 1 \u00b7 Exceptions/Errored",
+      "options": {
+        "query": "index=YOUR_INDEX requestType=\"Proxy\" pass=\"1\" status=\"Exceptions/Errored\" | stats count as Count"
+      }
+    },
+    "ds_p2_0_2": {
+      "type": "ds.search",
+      "name": "Pass 2 \u00b7 Exceptions/Errored",
+      "options": {
+        "query": "index=YOUR_INDEX requestType=\"Proxy\" pass=\"2\" status=\"Exceptions/Errored\" | stats count as Count"
+      }
+    },
+    "ds_pass2_0": {
+      "type": "ds.search",
+      "name": "Proxy Pass 2 Requests",
+      "options": {
+        "query": "index=YOUR_INDEX requestType=\"Proxy\" pass=\"2\" | stats count as Count"
+      }
+    },
+    "ds_offer_0": {
+      "type": "ds.search",
+      "name": "Accepted Offers",
+      "options": {
+        "query": "index=YOUR_INDEX requestType=\"Proxy\" eventType=\"AMAZON_ACCEPT_OFFER\" | stats count as Count"
+      }
+    },
+    "ds_start_1": {
+      "type": "ds.search",
+      "name": "Amazon Prequal Pass 1 Requests",
+      "options": {
+        "query": "index=YOUR_INDEX requestType=\"Amazon Prequal\" pass=\"1\" | stats count as Count"
+      }
+    },
+    "ds_p1_1_0": {
+      "type": "ds.search",
+      "name": "Pass 1 \u00b7 Declined",
+      "options": {
+        "query": "index=YOUR_INDEX requestType=\"Amazon Prequal\" pass=\"1\" status=\"Declined\" | stats count as Count"
+      }
+    },
+    "ds_p2_1_0": {
+      "type": "ds.search",
+      "name": "Pass 2 \u00b7 Declined",
+      "options": {
+        "query": "index=YOUR_INDEX requestType=\"Amazon Prequal\" pass=\"2\" status=\"Declined\" | stats count as Count"
+      }
+    },
+    "ds_p1_1_1": {
+      "type": "ds.search",
+      "name": "Pass 1 \u00b7 Approved",
+      "options": {
+        "query": "index=YOUR_INDEX requestType=\"Amazon Prequal\" pass=\"1\" status=\"Approved\" | stats count as Count"
+      }
+    },
+    "ds_p2_1_1": {
+      "type": "ds.search",
+      "name": "Pass 2 \u00b7 Approved",
+      "options": {
+        "query": "index=YOUR_INDEX requestType=\"Amazon Prequal\" pass=\"2\" status=\"Approved\" | stats count as Count"
+      }
+    },
+    "ds_p1_1_2": {
+      "type": "ds.search",
+      "name": "Pass 1 \u00b7 Exceptions/Errored",
+      "options": {
+        "query": "index=YOUR_INDEX requestType=\"Amazon Prequal\" pass=\"1\" status=\"Exceptions/Errored\" | stats count as Count"
+      }
+    },
+    "ds_p2_1_2": {
+      "type": "ds.search",
+      "name": "Pass 2 \u00b7 Exceptions/Errored",
+      "options": {
+        "query": "index=YOUR_INDEX requestType=\"Amazon Prequal\" pass=\"2\" status=\"Exceptions/Errored\" | stats count as Count"
+      }
+    },
+    "ds_pass2_1": {
+      "type": "ds.search",
+      "name": "Amazon Prequal Pass 2 Requests",
+      "options": {
+        "query": "index=YOUR_INDEX requestType=\"Amazon Prequal\" pass=\"2\" | stats count as Count"
+      }
+    },
+    "ds_offer_1": {
+      "type": "ds.search",
+      "name": "Accepted Offers",
+      "options": {
+        "query": "index=YOUR_INDEX requestType=\"Amazon Prequal\" eventType=\"AMAZON_ACCEPT_OFFER\" | stats count as Count"
+      }
+    }
+  },
+  "layout": {
+    "globalInputs": [
+      "input_time"
+    ],
+    "layoutDefinitions": {
+      "layout_1": {
+        "type": "absolute",
+        "options": {
+          "width": 1500,
+          "height": 980
+        },
+        "structure": [
+          {
+            "item": "heading",
+            "type": "block",
+            "position": {
+              "x": 400,
+              "y": 10,
+              "w": 680,
+              "h": 52
+            }
+          },
+          {
+            "item": "label_0_left",
+            "type": "block",
+            "position": {
+              "x": 335,
+              "y": 50,
+              "w": 255,
+              "h": 44
+            }
+          },
+          {
+            "item": "label_0_right",
+            "type": "block",
+            "position": {
+              "x": 1160,
+              "y": 50,
+              "w": 310,
+              "h": 44
+            }
+          },
+          {
+            "item": "start_0",
+            "type": "block",
+            "position": {
+              "x": 20,
+              "y": 207,
+              "w": 240,
+              "h": 92
+            }
+          },
+          {
+            "item": "p1_0_0",
+            "type": "block",
+            "position": {
+              "x": 345,
+              "y": 95,
+              "w": 235,
+              "h": 87
+            }
+          },
+          {
+            "item": "p2_0_0",
+            "type": "block",
+            "position": {
+              "x": 1200,
+              "y": 95,
+              "w": 250,
+              "h": 87
+            }
+          },
+          {
+            "item": "p1_0_1",
+            "type": "block",
+            "position": {
+              "x": 345,
+              "y": 205,
+              "w": 235,
+              "h": 87
+            }
+          },
+          {
+            "item": "p2_0_1",
+            "type": "block",
+            "position": {
+              "x": 1200,
+              "y": 205,
+              "w": 250,
+              "h": 87
+            }
+          },
+          {
+            "item": "p1_0_2",
+            "type": "block",
+            "position": {
+              "x": 345,
+              "y": 315,
+              "w": 235,
+              "h": 87
+            }
+          },
+          {
+            "item": "p2_0_2",
+            "type": "block",
+            "position": {
+              "x": 1200,
+              "y": 315,
+              "w": 250,
+              "h": 87
+            }
+          },
+          {
+            "item": "pass2_0",
+            "type": "block",
+            "position": {
+              "x": 820,
+              "y": 207,
+              "w": 215,
+              "h": 92
+            }
+          },
+          {
+            "item": "left_br_0",
+            "type": "block",
+            "position": {
+              "x": 265,
+              "y": 187,
+              "w": 75,
+              "h": 140
+            }
+          },
+          {
+            "item": "right_br_0",
+            "type": "block",
+            "position": {
+              "x": 1045,
+              "y": 187,
+              "w": 145,
+              "h": 140
+            }
+          },
+          {
+            "item": "offer_label_0",
+            "type": "block",
+            "position": {
+              "x": 590,
+              "y": 194,
+              "w": 225,
+              "h": 70
+            }
+          },
+          {
+            "item": "offer_0",
+            "type": "block",
+            "position": {
+              "x": 605,
+              "y": 268,
+              "w": 175,
+              "h": 83
+            }
+          },
+          {
+            "item": "flow_top_0",
+            "type": "block",
+            "position": {
+              "x": 280,
+              "y": 99,
+              "w": 65,
+              "h": 48
+            }
+          },
+          {
+            "item": "flow_bottom_0",
+            "type": "block",
+            "position": {
+              "x": 280,
+              "y": 340,
+              "w": 65,
+              "h": 48
+            }
+          },
+          {
+            "item": "flow_top_right_0",
+            "type": "block",
+            "position": {
+              "x": 1130,
+              "y": 99,
+              "w": 65,
+              "h": 48
+            }
+          },
+          {
+            "item": "flow_bottom_right_0",
+            "type": "block",
+            "position": {
+              "x": 1130,
+              "y": 340,
+              "w": 65,
+              "h": 48
+            }
+          },
+          {
+            "item": "label_1_left",
+            "type": "block",
+            "position": {
+              "x": 335,
+              "y": 490,
+              "w": 255,
+              "h": 44
+            }
+          },
+          {
+            "item": "label_1_right",
+            "type": "block",
+            "position": {
+              "x": 1160,
+              "y": 490,
+              "w": 310,
+              "h": 44
+            }
+          },
+          {
+            "item": "start_1",
+            "type": "block",
+            "position": {
+              "x": 20,
+              "y": 647,
+              "w": 240,
+              "h": 92
+            }
+          },
+          {
+            "item": "p1_1_0",
+            "type": "block",
+            "position": {
+              "x": 345,
+              "y": 535,
+              "w": 235,
+              "h": 87
+            }
+          },
+          {
+            "item": "p2_1_0",
+            "type": "block",
+            "position": {
+              "x": 1200,
+              "y": 535,
+              "w": 250,
+              "h": 87
+            }
+          },
+          {
+            "item": "p1_1_1",
+            "type": "block",
+            "position": {
+              "x": 345,
+              "y": 645,
+              "w": 235,
+              "h": 87
+            }
+          },
+          {
+            "item": "p2_1_1",
+            "type": "block",
+            "position": {
+              "x": 1200,
+              "y": 645,
+              "w": 250,
+              "h": 87
+            }
+          },
+          {
+            "item": "p1_1_2",
+            "type": "block",
+            "position": {
+              "x": 345,
+              "y": 755,
+              "w": 235,
+              "h": 87
+            }
+          },
+          {
+            "item": "p2_1_2",
+            "type": "block",
+            "position": {
+              "x": 1200,
+              "y": 755,
+              "w": 250,
+              "h": 87
+            }
+          },
+          {
+            "item": "pass2_1",
+            "type": "block",
+            "position": {
+              "x": 820,
+              "y": 647,
+              "w": 215,
+              "h": 92
+            }
+          },
+          {
+            "item": "left_br_1",
+            "type": "block",
+            "position": {
+              "x": 265,
+              "y": 627,
+              "w": 75,
+              "h": 140
+            }
+          },
+          {
+            "item": "right_br_1",
+            "type": "block",
+            "position": {
+              "x": 1045,
+              "y": 627,
+              "w": 145,
+              "h": 140
+            }
+          },
+          {
+            "item": "offer_label_1",
+            "type": "block",
+            "position": {
+              "x": 590,
+              "y": 634,
+              "w": 225,
+              "h": 70
+            }
+          },
+          {
+            "item": "offer_1",
+            "type": "block",
+            "position": {
+              "x": 605,
+              "y": 708,
+              "w": 175,
+              "h": 83
+            }
+          },
+          {
+            "item": "flow_top_1",
+            "type": "block",
+            "position": {
+              "x": 280,
+              "y": 539,
+              "w": 65,
+              "h": 48
+            }
+          },
+          {
+            "item": "flow_bottom_1",
+            "type": "block",
+            "position": {
+              "x": 280,
+              "y": 780,
+              "w": 65,
+              "h": 48
+            }
+          },
+          {
+            "item": "flow_top_right_1",
+            "type": "block",
+            "position": {
+              "x": 1130,
+              "y": 539,
+              "w": 65,
+              "h": 48
+            }
+          },
+          {
+            "item": "flow_bottom_right_1",
+            "type": "block",
+            "position": {
+              "x": 1130,
+              "y": 780,
+              "w": 65,
+              "h": 48
+            }
+          }
+        ]
+      }
+    },
+    "tabs": {
+      "items": [
+        {
+          "label": "Request Flow",
+          "layoutId": "layout_1"
+        }
+      ]
+    }
+  }
+}
