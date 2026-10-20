@@ -1,0 +1,126 @@
+"h": 295
+}
+},
+{
+"item": "viz_0_table",
+"type": "block",
+"position": {
+"x": 725,
+"y": 210,
+"w": 705,
+"h": 295
+}
+},
+{
+"item": "viz_1_p1",
+"type": "block",
+"position": {
+"x": 10,
+"y": 540,
+"w": 240,
+"h": 125
+}
+},
+{
+"item": "viz_1_p1_0",
+"type": "block",
+"position": {
+"x": 260,
+"y": 540,
+"w": 215,
+"h": 125
+}
+},
+{
+"item": "viz_1_p1_1",
+"type": "block",
+"position": {
+"x": 485,
+"y": 540,
+"w": 215,
+"h": 125
+}
+},
+{
+"item": "viz_1_p1_2",
+"type": "block",
+"position": {
+"x": 710,
+"y": 540,
+"w": 215,
+"h": 125
+}
+},
+{
+"item": "viz_1_offer",
+"type": "block",
+"position": {
+"x": 950,
+"y": 540,
+"w": 235,
+"h": 125
+}
+},
+{
+"item": "viz_1_p2",
+"type": "block",
+"position": {
+"x": 1195,
+"y": 540,
+"w": 235,
+"h": 125
+}
+},
+{
+"item": "viz_1_chart",
+"type": "block",
+"position": {
+"x": 10,
+"y": 680,
+"w": 700,
+"h": 295
+}
+},
+{
+"item": "viz_1_table",
+"type": "block",
+"position": {
+"x": 725,
+"y": 680,
+"w": 705,
+"h": 295
+}
+},
+{
+"item": "viz_trend",
+"type": "block",
+"position": {
+"x": 10,
+"y": 1010,
+"w": 700,
+"h": 140
+}
+},
+{
+"item": "viz_errors",
+"type": "block",
+"position": {
+"x": 725,
+"y": 1010,
+"w": 705,
+"h": 140
+}
+}
+]
+}
+},
+"tabs": {
+  "items": [
+    {
+      "label": "Request Flow",
+      "layoutId": "layout_1"
+    }
+  ]
+}
+}
+}
