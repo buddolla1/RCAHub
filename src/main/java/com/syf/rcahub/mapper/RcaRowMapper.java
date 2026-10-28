@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 public class RcaRowMapper implements RowMapper<RcaIncident> {
@@ -38,6 +40,14 @@ public class RcaRowMapper implements RowMapper<RcaIncident> {
                 rs.getString("detection_point"),
                 rs.getString("preventive_actions"),
                 rs.getString("rca_status"),
+                rs.getString("rca_category"),
+                rs.getString("portfolio_name"),
+                rs.getString("detection_point_detail"),
+                rs.getString("impacted_systems"),
+                rs.getString("resolution"),
+                splitRootCauseIssues(rs.getString("root_cause_issues")),
+                rs.getString("root_cause_other_detail"),
+                rs.getString("review_type"),
                 rs.getObject("created_at", LocalDateTime.class),
                 rs.getObject("updated_at", LocalDateTime.class));
     }
@@ -50,5 +60,9 @@ public class RcaRowMapper implements RowMapper<RcaIncident> {
     private Integer getNullableInteger(ResultSet rs, String column) throws SQLException {
         int value = rs.getInt(column);
         return rs.wasNull() ? null : value;
+    }
+
+    private List<String> splitRootCauseIssues(String value) {
+        return value == null || value.isBlank() ? List.of() : Arrays.asList(value.split("\\|"));
     }
 }

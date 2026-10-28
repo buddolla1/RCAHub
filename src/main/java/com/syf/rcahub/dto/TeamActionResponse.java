@@ -8,6 +8,7 @@ public record TeamActionResponse(
         String teamName,
         String learnings,
         String correctiveActions,
+        String ticketNumber,
         LocalDate targetCompletionDate,
         LocalDateTime createdAt,
         LocalDateTime updatedAt) {

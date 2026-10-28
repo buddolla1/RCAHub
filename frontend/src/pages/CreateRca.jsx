@@ -18,7 +18,8 @@ export default function CreateRca() {
     setFieldErrors({})
     try {
       const created = await createRca(payload)
-      navigate(`/rcas/${created.id}`, { state: { notice: `RCA ${created.incidentNumber} was created.` } })
+      const identifier = created.incidentNumber || `${created.rcaCategory || 'record'} #${created.id}`
+      navigate(`/rcas/${created.id}`, { state: { notice: `RCA ${identifier} was created.` } })
       return true
     } catch (apiError) {
       setError(apiError.message)

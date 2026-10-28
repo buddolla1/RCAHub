@@ -35,3 +35,18 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Frontend ###
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+frontend/.vite/
+
+### Local environment and logs ###
+.env
+.env.*
+!.env.example
+*.log
+
+### macOS ###
+.DS_Store

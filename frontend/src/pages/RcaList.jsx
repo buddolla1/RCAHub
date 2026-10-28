@@ -39,10 +39,11 @@ export default function RcaList() {
   }
 
   const remove = async (rca) => {
-    if (!window.confirm(`Delete RCA ${rca.incidentNumber}? This action cannot be undone.`)) return
+    const identifier = rca.incidentNumber || `${rca.rcaCategory || 'RCA'} #${rca.id}`
+    if (!window.confirm(`Delete RCA ${identifier}? This action cannot be undone.`)) return
     try {
       await deleteRca(rca.id)
-      setNotice(`RCA ${rca.incidentNumber} was deleted.`)
+      setNotice(`RCA ${identifier} was deleted.`)
       load()
     } catch (apiError) {
       setError(apiError.message)
@@ -50,7 +51,7 @@ export default function RcaList() {
   }
 
   const columns = [
-    { key: 'incidentNumber', label: 'Incident Number', render: (row) => <Link className="table-link" to={`/rcas/${row.id}`}>{row.incidentNumber}</Link> },
+    { key: 'incidentNumber', label: 'RCA Reference', render: (row) => <Link className="table-link" to={`/rcas/${row.id}`}>{row.incidentNumber || `${row.rcaCategory || 'RCA'} #${row.id}`}</Link> },
     { key: 'priority', label: 'Priority', render: (row) => row.priority ? <span className={`priority priority-${row.priority.toLowerCase()}`}>{row.priority}</span> : '—' },
     { key: 'application', label: 'Application', render: (row) => row.application || '—' },
     { key: 'artTeamName', label: 'ART Team', render: (row) => row.artTeamName || '—' },
@@ -91,7 +92,7 @@ export default function RcaList() {
           onChange={(event) => setFilters({ ...filters, application: event.target.value })} />
         <select aria-label="Filter RCA status" value={filters.rcaStatus}
           onChange={(event) => setFilters({ ...filters, rcaStatus: event.target.value })}>
-          <option value="">All statuses</option>{['Open', 'In Progress', 'Completed'].map((value) => <option key={value}>{value}</option>)}
+          <option value="">All statuses</option>{['Open', 'In Progress', 'Pending Review', 'Request Closure', 'Closed'].map((value) => <option key={value}>{value}</option>)}
         </select>
         <select aria-label="Sort RCAs" value={sort} onChange={(event) => { setSort(event.target.value); setPage(0) }}>
           <option value="createdAt,desc">Newest created</option>

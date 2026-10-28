@@ -20,6 +20,7 @@ public class TeamActionRowMapper implements RowMapper<TeamAction> {
                 rs.getString("team_name"),
                 rs.getString("learnings"),
                 rs.getString("corrective_actions"),
+                rs.getString("ticket_number"),
                 rs.getObject("target_completion_date", LocalDate.class),
                 rs.getObject("created_at", LocalDateTime.class),
                 rs.getObject("updated_at", LocalDateTime.class));

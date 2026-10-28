@@ -28,7 +28,8 @@ export default function EditRca() {
     setFieldErrors({})
     try {
       const updated = await updateRca(id, payload)
-      navigate(`/rcas/${id}`, { state: { notice: `RCA ${updated.incidentNumber} was updated.` } })
+      const identifier = updated.incidentNumber || `${updated.rcaCategory || 'record'} #${updated.id}`
+      navigate(`/rcas/${id}`, { state: { notice: `RCA ${identifier} was updated.` } })
       return true
     } catch (apiError) {
       setError(apiError.message)

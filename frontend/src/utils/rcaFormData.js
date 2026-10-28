@@ -4,9 +4,23 @@ export const TEAM_LABELS = {
   Dev: 'Development',
   QA: 'Quality Assurance',
   RTS: 'RTS',
-  'Program Management': 'Program Management',
-  'Release Management': 'Release Management',
+  'Program Management': 'Program Manager',
+  'Release Management': 'Release Mgmt',
 }
+
+export const ROOT_CAUSE_ISSUES = [
+  'Configuration Issue',
+  'Code Issue',
+  'Environment Issue',
+  'Inadequate Testing',
+  'Requirement Gap',
+  'Missed Pre-Deployment Verification',
+  'Impact Analysis',
+  'DB Performance Issue',
+  'Infrastructure Changes',
+  'Application Code Release',
+  'DB Changes',
+]
 
 export const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -14,6 +28,14 @@ export const MONTHS = [
 ]
 
 export const emptyRca = () => ({
+  rcaCategory: '',
+  portfolioName: '',
+  detectionPointDetail: '',
+  impactedSystems: '',
+  resolution: '',
+  rootCauseIssues: [],
+  rootCauseOtherDetail: '',
+  reviewType: '',
   serialNumber: '',
   incidentMonth: '',
   incidentYear: new Date().getFullYear().toString(),
@@ -41,6 +63,7 @@ export const emptyRca = () => ({
     teamName,
     learnings: '',
     correctiveActions: '',
+    ticketNumber: '',
     targetCompletionDate: '',
   })),
 })
@@ -56,10 +79,19 @@ export function fromApiRca(rca) {
     releaseDatetime: rca.releaseDatetime?.slice(0, 16) || '',
     incidentStartTime: rca.incidentStartTime?.slice(0, 16) || '',
     incidentEndTime: rca.incidentEndTime?.slice(0, 16) || '',
+    rcaCategory: rca.rcaCategory || '',
+    portfolioName: rca.portfolioName || '',
+    detectionPointDetail: rca.detectionPointDetail || '',
+    impactedSystems: rca.impactedSystems || '',
+    resolution: rca.resolution || '',
+    rootCauseIssues: rca.rootCauseIssues || [],
+    rootCauseOtherDetail: rca.rootCauseOtherDetail || '',
+    reviewType: rca.reviewType || '',
     teamActions: TEAM_NAMES.map((teamName) => ({
       teamName,
       learnings: sourceActions.get(teamName)?.learnings || '',
       correctiveActions: sourceActions.get(teamName)?.correctiveActions || '',
+      ticketNumber: sourceActions.get(teamName)?.ticketNumber || '',
       targetCompletionDate: sourceActions.get(teamName)?.targetCompletionDate || '',
     })),
   }
@@ -78,6 +110,8 @@ export function toApiPayload(form) {
     priority: nullable(form.priority),
     rcaType: nullable(form.rcaType),
     detectionPoint: nullable(form.detectionPoint),
+    rootCauseIssues: form.rootCauseIssues,
+    reviewType: nullable(form.reviewType),
     teamActions: form.teamActions.map((action) => ({
       ...action,
       targetCompletionDate: nullable(action.targetCompletionDate),

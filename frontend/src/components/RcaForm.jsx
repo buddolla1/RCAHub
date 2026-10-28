@@ -1,14 +1,20 @@
 import { RotateCcw, Save, X } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MONTHS, emptyRca, toApiPayload } from '../utils/rcaFormData'
+import { ROOT_CAUSE_ISSUES, emptyRca, toApiPayload } from '../utils/rcaFormData'
 import TeamActionForm from './TeamActionForm'
 
-const priorityOptions = ['P1', 'P2', 'P3', 'P4']
-const rollbackOptions = ['Not Required', 'Planned', 'In Progress', 'Completed', 'Failed']
-const rcaTypeOptions = ['Technical', 'Process', 'Both']
-const detectionOptions = ['Monitoring', 'Customer', 'Other']
-const statusOptions = ['Open', 'In Progress', 'Completed']
+const categoryOptions = ['Incident', 'Rollback', 'Emergency Fix']
+const portfolioOptions = ['ABO']
+const priorityOptions = [
+  { value: 'P1', label: 'P1 - Critical' },
+  { value: 'P2', label: 'P2 - High' },
+  { value: 'P3', label: 'P3 - Medium' },
+  { value: 'P4', label: 'P4 - Low' },
+]
+const detectionOptions = ['Monitoring', 'Customer', 'Manual', 'Other']
+const statusOptions = ['Open', 'In Progress', 'Pending Review', 'Request Closure']
+const reviewOptions = ['Reviewer: ART team', 'Reviewer: SRE/Release mgmt']
 
 function SelectField({ id, label, options, value, onChange, error, required = false }) {
   return (
@@ -17,11 +23,32 @@ function SelectField({ id, label, options, value, onChange, error, required = fa
       <select id={id} value={value} onChange={onChange} aria-invalid={Boolean(error)} required={required}>
         <option value="">Select {label.toLowerCase()}</option>
         {options.map((option) => {
-          const value = typeof option === 'string' ? option : option.value
+          const optionValue = typeof option === 'string' ? option : option.value
           const optionLabel = typeof option === 'string' ? option : option.label
-          return <option key={value} value={value}>{optionLabel}</option>
+          return <option key={optionValue} value={optionValue}>{optionLabel}</option>
         })}
       </select>
+      {error && <small className="field-error">{error}</small>}
+    </label>
+  )
+}
+
+function TextField({ id, label, value, onChange, error, required = false, type = 'text', placeholder = '' }) {
+  return (
+    <label className="field" htmlFor={id}>
+      <span>{label}{required && <b aria-hidden="true"> *</b>}</span>
+      <input id={id} type={type} value={value} onChange={onChange} aria-invalid={Boolean(error)}
+        required={required} placeholder={placeholder} />
+      {error && <small className="field-error">{error}</small>}
+    </label>
+  )
+}
+
+function TextAreaField({ id, label, value, onChange, error, required = false, rows = 4 }) {
+  return (
+    <label className="field field-wide" htmlFor={id}>
+      <span>{label}{required && <b aria-hidden="true"> *</b>}</span>
+      <textarea id={id} rows={rows} value={value} onChange={onChange} aria-invalid={Boolean(error)} required={required} />
       {error && <small className="field-error">{error}</small>}
     </label>
   )
@@ -32,6 +59,10 @@ export default function RcaForm({ initialData, onSubmit, submitLabel, submitting
   const [form, setForm] = useState(initialData || emptyRca())
   const [errors, setErrors] = useState({})
   const [dirty, setDirty] = useState(false)
+  const [otherDialogOpen, setOtherDialogOpen] = useState(false)
+  const [otherDetail, setOtherDetail] = useState('')
+  const [otherDetailError, setOtherDetailError] = useState('')
+  const [otherSuccess, setOtherSuccess] = useState(false)
 
   useEffect(() => {
     setForm(initialData || emptyRca())
@@ -48,13 +79,14 @@ export default function RcaForm({ initialData, onSubmit, submitLabel, submitting
     return () => window.removeEventListener('beforeunload', warnOnExit)
   }, [dirty])
 
-  const monthYear = useMemo(() => {
-    if (!form.incidentMonth || !form.incidentYear) return 'Select month and year'
-    return `${MONTHS[Number(form.incidentMonth) - 1]} ${form.incidentYear}`
-  }, [form.incidentMonth, form.incidentYear])
-
   const changeField = (field, value) => {
-    setForm((current) => ({ ...current, [field]: value }))
+    setForm((current) => {
+      const next = { ...current, [field]: value }
+      if (field === 'rcaCategory' && value !== 'Incident') next.incidentNumber = ''
+      if (field === 'detectionPoint' && value !== 'Other') next.detectionPointDetail = ''
+      if (field === 'rcaStatus' && value !== 'Pending Review') next.reviewType = ''
+      return next
+    })
     setErrors((current) => ({ ...current, [field]: undefined }))
     setDirty(true)
   }
@@ -65,18 +97,85 @@ export default function RcaForm({ initialData, onSubmit, submitLabel, submitting
       teamActions: current.teamActions.map((action, actionIndex) =>
         actionIndex === index ? { ...action, [field]: value } : action),
     }))
+    setErrors((current) => ({
+      ...current,
+      teamActions: { ...current.teamActions, [index]: { ...current.teamActions?.[index], [field]: undefined } },
+    }))
     setDirty(true)
+  }
+
+  const toggleRootCauseIssue = (issue) => {
+    setForm((current) => ({
+      ...current,
+      rootCauseIssues: current.rootCauseIssues.includes(issue)
+        ? current.rootCauseIssues.filter((selected) => selected !== issue)
+        : [...current.rootCauseIssues, issue],
+    }))
+    setErrors((current) => ({ ...current, rootCauseIssues: undefined }))
+    setDirty(true)
+  }
+
+  const openOtherDialog = () => {
+    setOtherDetail(form.rootCauseOtherDetail || '')
+    setOtherDetailError('')
+    setOtherDialogOpen(true)
+  }
+
+  const saveOtherDetail = () => {
+    if (!otherDetail.trim()) {
+      setOtherDetailError('Category details are required')
+      return
+    }
+    changeField('rootCauseOtherDetail', otherDetail.trim())
+    setOtherDialogOpen(false)
+    setOtherSuccess(true)
   }
 
   const validate = () => {
     const next = {}
-    if (!form.incidentNumber.trim()) next.incidentNumber = 'Incident number is required'
-    if (!form.issueDescription.trim()) next.issueDescription = 'Issue description is required'
-    if (!form.rcaStatus) next.rcaStatus = 'RCA status is required'
-    if (form.incidentStartTime && form.incidentEndTime
-      && form.incidentEndTime < form.incidentStartTime) {
-      next.incidentEndTime = 'Incident end time cannot precede the start time'
+    const requiredFields = {
+      rcaCategory: 'RCA category is required',
+      application: 'Application name is required',
+      portfolioName: 'Portfolio name is required',
+      artTeamName: 'ART team name is required',
+      programManager: 'Program manager is required',
+      changeTicket: 'Change number is required',
+      incidentStartTime: 'Start time is required',
+      incidentEndTime: 'End time is required',
+      priority: 'Severity / priority is required',
+      detectionPoint: 'Detection point is required',
+      impactedSystems: 'Impacted systems / services are required',
+      issueDescription: 'Issue description is required',
+      businessImpact: 'Customer / business impact is required',
+      resolution: 'Resolution is required',
+      rcaStatus: 'RCA status is required',
     }
+    Object.entries(requiredFields).forEach(([field, message]) => {
+      if (!String(form[field] || '').trim()) next[field] = message
+    })
+    if (form.rcaCategory === 'Incident' && !form.incidentNumber.trim()) {
+      next.incidentNumber = 'Incident number is required for an Incident RCA'
+    }
+    if (form.detectionPoint === 'Other' && !form.detectionPointDetail.trim()) {
+      next.detectionPointDetail = 'Detection point details are required when Other is selected'
+    }
+    if (form.rcaStatus === 'Pending Review' && !form.reviewType) {
+      next.reviewType = 'Review type is required for Pending Review'
+    }
+    if (form.rootCauseIssues.length === 0 && !form.rootCauseOtherDetail.trim()) {
+      next.rootCauseIssues = 'Select at least one root cause analysis issue'
+    }
+    if (form.incidentStartTime && form.incidentEndTime && form.incidentEndTime < form.incidentStartTime) {
+      next.incidentEndTime = 'End time cannot precede the start time'
+    }
+    next.teamActions = {}
+    form.teamActions.forEach((action, index) => {
+      const actionErrors = {}
+      if (!action.learnings.trim()) actionErrors.learnings = 'Learnings / action items are required; enter NA if not applicable'
+      if (!action.correctiveActions.trim()) actionErrors.correctiveActions = 'Corrective actions are required; enter NA if not applicable'
+      if (Object.keys(actionErrors).length) next.teamActions[index] = actionErrors
+    })
+    if (Object.keys(next.teamActions).length === 0) delete next.teamActions
     setErrors(next)
     return Object.keys(next).length === 0
   }
@@ -99,6 +198,7 @@ export default function RcaForm({ initialData, onSubmit, submitLabel, submitting
     if (!dirty || window.confirm('Reset all fields to their original values?')) {
       setForm(initialData || emptyRca())
       setErrors({})
+      setOtherSuccess(false)
       setDirty(false)
     }
   }
@@ -110,142 +210,151 @@ export default function RcaForm({ initialData, onSubmit, submitLabel, submitting
       <section className="form-section">
         <div className="section-heading">
           <span>01</span>
-          <div><h2>Incident Details</h2><p>Core incident identification and ownership.</p></div>
+          <div><h2>RCA Category &amp; Incident Details</h2><p>Basic information, timeline, severity, detection, and impact.</p></div>
         </div>
+        <h3 className="form-subheading">Basic Information</h3>
         <div className="form-grid">
-          <label className="field" htmlFor="serialNumber">
-            <span>S. No.</span>
-            <input id="serialNumber" type="number" min="1" value={form.serialNumber}
-              onChange={(event) => changeField('serialNumber', event.target.value)} />
-          </label>
-          <SelectField id="incidentMonth" label="Month" options={MONTHS.map((month, index) => ({ value: index + 1, label: month }))}
-            value={form.incidentMonth} onChange={(event) => changeField('incidentMonth', event.target.value)} />
-          <label className="field" htmlFor="incidentYear">
-            <span>Year</span>
-            <input id="incidentYear" type="number" min="2000" max="9999" value={form.incidentYear}
-              onChange={(event) => changeField('incidentYear', event.target.value)} />
-          </label>
-          <label className="field" htmlFor="monthYear">
-            <span>Month - Year</span>
-            <input id="monthYear" value={monthYear} readOnly className="derived-input" />
-          </label>
-          <label className="field" htmlFor="incidentNumber">
-            <span>Incident Number <b aria-hidden="true">*</b></span>
-            <input id="incidentNumber" value={form.incidentNumber} required
-              aria-invalid={Boolean(errorFor('incidentNumber'))}
-              onChange={(event) => changeField('incidentNumber', event.target.value)} />
-            {errorFor('incidentNumber') && <small className="field-error">{errorFor('incidentNumber')}</small>}
-          </label>
-          <label className="field" htmlFor="changeTicket">
-            <span>Change Ticket Caused Incident</span>
-            <input id="changeTicket" value={form.changeTicket}
-              onChange={(event) => changeField('changeTicket', event.target.value)} />
-          </label>
-          <SelectField id="priority" label="Priority" options={priorityOptions} value={form.priority}
-            onChange={(event) => changeField('priority', event.target.value)} />
-          {['tower', 'application', 'programManager', 'artTeamName'].map((field) => (
-            <label className="field" htmlFor={field} key={field}>
-              <span>{{ tower: 'Tower', application: 'Application', programManager: 'Program Manager', artTeamName: 'ART Team Name' }[field]}</span>
-              <input id={field} value={form[field]}
-                onChange={(event) => changeField(field, event.target.value)} />
-            </label>
-          ))}
-          <label className="field field-wide" htmlFor="issueDescription">
-            <span>Issue Description <b aria-hidden="true">*</b></span>
-            <textarea id="issueDescription" rows="4" value={form.issueDescription} required
-              aria-invalid={Boolean(errorFor('issueDescription'))}
-              onChange={(event) => changeField('issueDescription', event.target.value)} />
-            {errorFor('issueDescription') && <small className="field-error">{errorFor('issueDescription')}</small>}
-          </label>
+          <SelectField id="rcaCategory" label="RCA Category" options={categoryOptions} value={form.rcaCategory}
+            onChange={(event) => changeField('rcaCategory', event.target.value)} error={errorFor('rcaCategory')} required />
+          <TextField id="application" label="Application Name" value={form.application}
+            onChange={(event) => changeField('application', event.target.value)} error={errorFor('application')} required />
+          <SelectField id="portfolioName" label="Portfolio Name" options={portfolioOptions} value={form.portfolioName}
+            onChange={(event) => changeField('portfolioName', event.target.value)} error={errorFor('portfolioName')} required />
+          {form.rcaCategory === 'Incident' && (
+            <TextField id="incidentNumber" label="Incident Number" value={form.incidentNumber}
+              onChange={(event) => changeField('incidentNumber', event.target.value)} error={errorFor('incidentNumber')}
+              placeholder="INC-2026-001" required />
+          )}
+        </div>
+
+        <h3 className="form-subheading">Team &amp; Timeline Information</h3>
+        <div className="form-grid">
+          <TextField id="artTeamName" label="ART Team Name" value={form.artTeamName}
+            onChange={(event) => changeField('artTeamName', event.target.value)} error={errorFor('artTeamName')} required />
+          <TextField id="programManager" label="Program Manager" value={form.programManager}
+            onChange={(event) => changeField('programManager', event.target.value)} error={errorFor('programManager')} required />
+          <TextField id="changeTicket" label="Change Number" value={form.changeTicket}
+            onChange={(event) => changeField('changeTicket', event.target.value)} error={errorFor('changeTicket')}
+            placeholder="CHG-2026-001" required />
+          <TextField id="incidentStartTime" label="Start Time" type="datetime-local" value={form.incidentStartTime}
+            onChange={(event) => changeField('incidentStartTime', event.target.value)} error={errorFor('incidentStartTime')} required />
+          <TextField id="incidentEndTime" label="End Time" type="datetime-local" value={form.incidentEndTime}
+            onChange={(event) => changeField('incidentEndTime', event.target.value)} error={errorFor('incidentEndTime')} required />
+        </div>
+
+        <h3 className="form-subheading">Severity &amp; Detection</h3>
+        <div className="form-grid">
+          <SelectField id="priority" label="Severity / Priority" options={priorityOptions} value={form.priority}
+            onChange={(event) => changeField('priority', event.target.value)} error={errorFor('priority')} required />
+          <SelectField id="detectionPoint" label="Detection Point" options={detectionOptions} value={form.detectionPoint}
+            onChange={(event) => changeField('detectionPoint', event.target.value)} error={errorFor('detectionPoint')} required />
+          {form.detectionPoint === 'Other' && (
+            <TextAreaField id="detectionPointDetail" label="Detection Point Detail" value={form.detectionPointDetail}
+              onChange={(event) => changeField('detectionPointDetail', event.target.value)}
+              error={errorFor('detectionPointDetail')} required rows={3} />
+          )}
+        </div>
+
+        <h3 className="form-subheading">Incident Impact &amp; Resolution</h3>
+        <div className="form-grid">
+          <TextAreaField id="impactedSystems" label="Impacted Systems / Services" value={form.impactedSystems}
+            onChange={(event) => changeField('impactedSystems', event.target.value)} error={errorFor('impactedSystems')} required />
+          <TextAreaField id="issueDescription" label="Issue Description" value={form.issueDescription}
+            onChange={(event) => changeField('issueDescription', event.target.value)} error={errorFor('issueDescription')} required />
+          <TextAreaField id="businessImpact" label="Customer / Business Impact" value={form.businessImpact}
+            onChange={(event) => changeField('businessImpact', event.target.value)} error={errorFor('businessImpact')} required />
+          <TextAreaField id="resolution" label="Resolution" value={form.resolution}
+            onChange={(event) => changeField('resolution', event.target.value)} error={errorFor('resolution')} required />
         </div>
       </section>
 
       <section className="form-section">
         <div className="section-heading">
           <span>02</span>
-          <div><h2>Release and Impact</h2><p>Timeline, rollback state, and business exposure.</p></div>
+          <div><h2>RCA Detail</h2><p>Select the contributing issues and manage the RCA workflow.</p></div>
         </div>
-        <div className="form-grid">
-          {[['releaseDatetime', 'Release Date and Time'], ['incidentStartTime', 'Incident Start Time'],
-            ['incidentEndTime', 'Incident End Time']].map(([field, label]) => (
-            <label className="field" htmlFor={field} key={field}>
-              <span>{label}</span>
-              <input id={field} type="datetime-local" value={form[field]}
-                aria-invalid={Boolean(errorFor(field))}
-                onChange={(event) => changeField(field, event.target.value)} />
-              {errorFor(field) && <small className="field-error">{errorFor(field)}</small>}
+        <h3 className="form-subheading">RCA Analysis</h3>
+        <fieldset className="checkbox-fieldset" aria-invalid={Boolean(errorFor('rootCauseIssues'))}>
+          <legend>Root Cause Analysis Issues <b aria-hidden="true">*</b></legend>
+          <div className="checkbox-grid">
+            {ROOT_CAUSE_ISSUES.map((issue) => (
+              <label className="checkbox-option" key={issue}>
+                <input type="checkbox" checked={form.rootCauseIssues.includes(issue)}
+                  onChange={() => toggleRootCauseIssue(issue)} />
+                <span>{issue}</span>
+              </label>
+            ))}
+            <label className="checkbox-option">
+              <input type="checkbox" checked={false} onChange={openOtherDialog} />
+              <span>Any Other Category</span>
             </label>
-          ))}
-          <SelectField id="rollbackStatus" label="Release Rollback Status" options={rollbackOptions}
-            value={form.rollbackStatus} onChange={(event) => changeField('rollbackStatus', event.target.value)} />
-          <label className="field field-wide" htmlFor="impactedSystem">
-            <span>Impacted System</span>
-            <input id="impactedSystem" value={form.impactedSystem}
-              onChange={(event) => changeField('impactedSystem', event.target.value)} />
-          </label>
-          <label className="field field-wide" htmlFor="businessImpact">
-            <span>Customer / Business Impact</span>
-            <textarea id="businessImpact" rows="4" value={form.businessImpact}
-              onChange={(event) => changeField('businessImpact', event.target.value)} />
-          </label>
+          </div>
+          {errorFor('rootCauseIssues') && <small className="field-error">{errorFor('rootCauseIssues')}</small>}
+          {otherSuccess && form.rootCauseOtherDetail && (
+            <div className="inline-success" role="status">
+              Category details submitted. The closure workflow has been triggered.
+              <button type="button" onClick={openOtherDialog}>Edit details</button>
+            </div>
+          )}
+        </fieldset>
+
+        <h3 className="form-subheading">RCA Status Management</h3>
+        <div className="form-grid">
+          <SelectField id="rcaStatus" label="RCA Status" options={statusOptions} value={form.rcaStatus}
+            onChange={(event) => changeField('rcaStatus', event.target.value)} error={errorFor('rcaStatus')} required />
+          {form.rcaStatus === 'Pending Review' && (
+            <SelectField id="reviewType" label="Review Type" options={reviewOptions} value={form.reviewType}
+              onChange={(event) => changeField('reviewType', event.target.value)} error={errorFor('reviewType')} required />
+          )}
         </div>
+        <p className="workflow-note">Request Closure starts the admin approval workflow. Closed is reserved for administrators.</p>
       </section>
 
       <section className="form-section">
         <div className="section-heading">
           <span>03</span>
-          <div><h2>Root Cause Analysis</h2><p>Diagnosis, remediation, detection, and prevention.</p></div>
-        </div>
-        <div className="form-grid">
-          <label className="field field-wide" htmlFor="rootCause">
-            <span>Root Cause</span>
-            <textarea id="rootCause" rows="4" value={form.rootCause}
-              onChange={(event) => changeField('rootCause', event.target.value)} />
-          </label>
-          <SelectField id="rcaType" label="RCA Type" options={rcaTypeOptions} value={form.rcaType}
-            onChange={(event) => changeField('rcaType', event.target.value)} />
-          <SelectField id="detectionPoint" label="Detection Point" options={detectionOptions}
-            value={form.detectionPoint} onChange={(event) => changeField('detectionPoint', event.target.value)} />
-          <label className="field field-wide" htmlFor="remedyUsed">
-            <span>Remedy Used</span>
-            <textarea id="remedyUsed" rows="3" value={form.remedyUsed}
-              onChange={(event) => changeField('remedyUsed', event.target.value)} />
-          </label>
-          <label className="field field-wide" htmlFor="preventiveActions">
-            <span>Preventive Actions &amp; Next Steps</span>
-            <textarea id="preventiveActions" rows="4" value={form.preventiveActions}
-              onChange={(event) => changeField('preventiveActions', event.target.value)} />
-          </label>
-          <SelectField id="rcaStatus" label="RCA Status" options={statusOptions} value={form.rcaStatus}
-            onChange={(event) => changeField('rcaStatus', event.target.value)}
-            error={errorFor('rcaStatus')} required />
-        </div>
-      </section>
-
-      <section className="form-section">
-        <div className="section-heading">
-          <span>04</span>
-          <div><h2>Team Learnings and Corrective Actions</h2><p>Capture ownership and follow-through for every delivery group.</p></div>
+          <div><h2>Team-Specific Learnings &amp; Corrective Actions</h2><p>All five teams require learnings and corrective actions; enter NA when not applicable.</p></div>
         </div>
         <div className="team-actions">
           {form.teamActions.map((action, index) => (
-            <TeamActionForm key={action.teamName} action={action} index={index} onChange={changeTeamAction} />
+            <TeamActionForm key={action.teamName} action={action} index={index} onChange={changeTeamAction}
+              errors={errors.teamActions?.[index]} />
           ))}
         </div>
       </section>
 
       <div className="form-actions">
-        <button type="button" className="button button-ghost" onClick={cancel}>
-          <X size={17} /> Cancel
-        </button>
-        <button type="button" className="button button-secondary" onClick={reset}>
-          <RotateCcw size={17} /> Reset Form
-        </button>
+        <button type="button" className="button button-ghost" onClick={cancel}><X size={17} /> Cancel</button>
+        <button type="button" className="button button-secondary" onClick={reset}><RotateCcw size={17} /> Reset Form</button>
         <button type="submit" className="button button-primary" disabled={submitting}>
           {submitting ? <span className="button-spinner" /> : <Save size={17} />}
           {submitting ? 'Saving...' : submitLabel}
         </button>
       </div>
+
+      {otherDialogOpen && (
+        <div className="modal-backdrop" role="presentation">
+          <section className="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="other-category-title">
+            <div className="modal-heading">
+              <div><p className="eyebrow">Root Cause Analysis</p><h2 id="other-category-title">Other category details</h2></div>
+              <button type="button" className="icon-button" aria-label="Close category details"
+                onClick={() => setOtherDialogOpen(false)}><X size={19} /></button>
+            </div>
+            <div>
+              <label className="field" htmlFor="rootCauseOtherDetail">
+                <span>Describe the category <b aria-hidden="true">*</b></span>
+                <textarea id="rootCauseOtherDetail" rows="5" autoFocus value={otherDetail}
+                  aria-invalid={Boolean(otherDetailError)} onChange={(event) => setOtherDetail(event.target.value)} />
+                {otherDetailError && <small className="field-error">{otherDetailError}</small>}
+              </label>
+              <div className="modal-actions">
+                <button type="button" className="button button-ghost" onClick={() => setOtherDialogOpen(false)}>Cancel</button>
+                <button type="button" className="button button-primary" onClick={saveOtherDetail}>Submit Details</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      )}
     </form>
   )
 }

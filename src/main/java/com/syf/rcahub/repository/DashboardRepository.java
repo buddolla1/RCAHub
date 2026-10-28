@@ -23,7 +23,7 @@ public class DashboardRepository {
                     COALESCE(SUM(rollback_status = 'Completed'), 0) AS completed_rollbacks,
                     COALESCE(SUM(rca_status = 'Open'), 0) AS open_rcas,
                     COALESCE(SUM(rca_status = 'In Progress'), 0) AS in_progress_rcas,
-                    COALESCE(SUM(rca_status = 'Completed'), 0) AS completed_rcas
+                    COALESCE(SUM(rca_status IN ('Closed', 'Completed')), 0) AS completed_rcas
                 FROM rca_incident
                 """, (rs, rowNum) -> new Totals(
                 rs.getLong("total_rcas"),

@@ -1,6 +1,7 @@
 package com.syf.rcahub.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record RcaIncident(
         Long id,
@@ -27,6 +28,14 @@ public record RcaIncident(
         String detectionPoint,
         String preventiveActions,
         String rcaStatus,
+        String rcaCategory,
+        String portfolioName,
+        String detectionPointDetail,
+        String impactedSystems,
+        String resolution,
+        List<String> rootCauseIssues,
+        String rootCauseOtherDetail,
+        String reviewType,
         LocalDateTime createdAt,
         LocalDateTime updatedAt) {
 }

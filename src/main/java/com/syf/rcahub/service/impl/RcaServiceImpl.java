@@ -95,6 +95,9 @@ public class RcaServiceImpl implements RcaService {
     }
 
     private void ensureIncidentNumberIsUnique(String incidentNumber, Long excludedId) {
+        if (incidentNumber == null || incidentNumber.isBlank()) {
+            return;
+        }
         String normalized = incidentNumber.trim();
         if (rcaRepository.existsByIncidentNumber(normalized, excludedId)) {
             throw new DuplicateIncidentException(normalized);
@@ -102,6 +105,25 @@ public class RcaServiceImpl implements RcaService {
     }
 
     private void validateBusinessRules(RcaRequest request) {
+        if ("Incident".equals(request.rcaCategory())
+                && (request.incidentNumber() == null || request.incidentNumber().isBlank())) {
+            throw new BusinessValidationException("Incident number is required for an Incident RCA");
+        }
+        if ("Other".equals(request.detectionPoint())
+                && (request.detectionPointDetail() == null || request.detectionPointDetail().isBlank())) {
+            throw new BusinessValidationException("Detection point detail is required when Other is selected");
+        }
+        if ("Pending Review".equals(request.rcaStatus())
+                && (request.reviewType() == null || request.reviewType().isBlank())) {
+            throw new BusinessValidationException("Review type is required for Pending Review");
+        }
+        if ("Closed".equals(request.rcaStatus())) {
+            throw new BusinessValidationException("Only an administrator can set an RCA to Closed");
+        }
+        if ((request.rootCauseIssues() == null || request.rootCauseIssues().isEmpty())
+                && (request.rootCauseOtherDetail() == null || request.rootCauseOtherDetail().isBlank())) {
+            throw new BusinessValidationException("At least one root cause analysis issue is required");
+        }
         if (request.incidentStartTime() != null && request.incidentEndTime() != null
                 && request.incidentEndTime().isBefore(request.incidentStartTime())) {
             throw new BusinessValidationException(
@@ -114,6 +136,10 @@ public class RcaServiceImpl implements RcaService {
                 throw new BusinessValidationException(
                         "Only one team action is allowed for team '" + action.teamName() + "'");
             }
+        }
+        Set<String> requiredTeams = Set.of("Dev", "QA", "RTS", "Program Management", "Release Management");
+        if (!teams.equals(requiredTeams)) {
+            throw new BusinessValidationException("Learnings and corrective actions are required for all five teams");
         }
     }
 
@@ -128,6 +154,7 @@ public class RcaServiceImpl implements RcaService {
                         action.teamName(),
                         action.learnings(),
                         action.correctiveActions(),
+                        action.ticketNumber(),
                         action.targetCompletionDate(),
                         action.createdAt(),
                         action.updatedAt()))
@@ -159,6 +186,14 @@ public class RcaServiceImpl implements RcaService {
                 incident.detectionPoint(),
                 incident.preventiveActions(),
                 incident.rcaStatus(),
+                incident.rcaCategory(),
+                incident.portfolioName(),
+                incident.detectionPointDetail(),
+                incident.impactedSystems(),
+                incident.resolution(),
+                incident.rootCauseIssues(),
+                incident.rootCauseOtherDetail(),
+                incident.reviewType(),
                 incident.createdAt(),
                 incident.updatedAt(),
                 actionResponses);

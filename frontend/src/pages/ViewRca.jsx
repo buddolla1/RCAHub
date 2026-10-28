@@ -44,7 +44,7 @@ export default function ViewRca() {
   return (
     <div className="page-container detail-page">
       <div className="page-header page-header-actions">
-        <div><p className="eyebrow">RCA Record</p><h1>{rca?.incidentNumber || 'RCA Details'}</h1><p>{rca?.issueDescription}</p></div>
+        <div><p className="eyebrow">RCA Record</p><h1>{rca?.incidentNumber || (rca ? `${rca.rcaCategory || 'RCA'} #${rca.id}` : 'RCA Details')}</h1><p>{rca?.issueDescription}</p></div>
         <div className="header-buttons">
           <Link className="button button-ghost" to="/rcas"><ArrowLeft size={17} /> All RCAs</Link>
           {rca && <Link className="button button-primary" to={`/rcas/${id}/edit`}><Edit3 size={17} /> Edit RCA</Link>}
@@ -61,34 +61,32 @@ export default function ViewRca() {
             <span>Priority {rca.priority || '—'}</span>
             <span>Updated {dateTime(rca.updatedAt)}</span>
           </div>
-          <DetailSection number="01" title="Incident Details">
-            <Detail label="S. No." value={rca.serialNumber} />
+          <DetailSection number="01" title="RCA Category & Incident Details">
+            <Detail label="RCA Category" value={rca.rcaCategory} />
             <Detail label="Incident Number" value={rca.incidentNumber} />
-            <Detail label="Change Ticket" value={rca.changeTicket} />
-            <Detail label="Priority" value={rca.priority} />
-            <Detail label="Tower" value={rca.tower} />
-            <Detail label="Application" value={rca.application} />
+            <Detail label="Change Number" value={rca.changeTicket} />
+            <Detail label="Severity / Priority" value={rca.priority} />
+            <Detail label="Portfolio Name" value={rca.portfolioName} />
+            <Detail label="Application Name" value={rca.application} />
             <Detail label="Program Manager" value={rca.programManager} />
             <Detail label="ART Team" value={rca.artTeamName} />
-            <Detail label="Issue Description" value={rca.issueDescription} wide />
-          </DetailSection>
-          <DetailSection number="02" title="Release and Impact">
-            <Detail label="Release Date and Time" value={dateTime(rca.releaseDatetime)} />
-            <Detail label="Rollback Status" value={rca.rollbackStatus} />
-            <Detail label="Incident Start" value={dateTime(rca.incidentStartTime)} />
-            <Detail label="Incident End" value={dateTime(rca.incidentEndTime)} />
-            <Detail label="Impacted System" value={rca.impactedSystem} wide />
-            <Detail label="Customer / Business Impact" value={rca.businessImpact} wide />
-          </DetailSection>
-          <DetailSection number="03" title="Root Cause Analysis">
-            <Detail label="RCA Type" value={rca.rcaType} />
+            <Detail label="Start Time" value={dateTime(rca.incidentStartTime)} />
+            <Detail label="End Time" value={dateTime(rca.incidentEndTime)} />
             <Detail label="Detection Point" value={rca.detectionPoint} />
-            <Detail label="Root Cause" value={rca.rootCause} wide />
-            <Detail label="Remedy Used" value={rca.remedyUsed} wide />
-            <Detail label="Preventive Actions & Next Steps" value={rca.preventiveActions} wide />
+            <Detail label="Detection Point Detail" value={rca.detectionPointDetail} />
+            <Detail label="Impacted Systems / Services" value={rca.impactedSystems} wide />
+            <Detail label="Issue Description" value={rca.issueDescription} wide />
+            <Detail label="Customer / Business Impact" value={rca.businessImpact} wide />
+            <Detail label="Resolution" value={rca.resolution} wide />
+          </DetailSection>
+          <DetailSection number="02" title="RCA Detail">
+            <Detail label="RCA Status" value={rca.rcaStatus} />
+            <Detail label="Review Type" value={rca.reviewType} />
+            <Detail label="Root Cause Analysis Issues" value={rca.rootCauseIssues?.join(', ')} wide />
+            <Detail label="Other Category Detail" value={rca.rootCauseOtherDetail} wide />
           </DetailSection>
           <section className="detail-section">
-            <div className="section-heading"><span>04</span><div><h2>Team Learnings and Corrective Actions</h2></div></div>
+            <div className="section-heading"><span>03</span><div><h2>Team Learnings and Corrective Actions</h2></div></div>
             <div className="team-detail-list">
               {rca.teamActions.map((action) => (
                 <article className="team-detail" key={action.teamName}>
@@ -96,6 +94,7 @@ export default function ViewRca() {
                   <dl className="details-grid">
                     <Detail label="Learnings" value={action.learnings} wide />
                     <Detail label="Corrective Actions" value={action.correctiveActions} wide />
+                    <Detail label="JIRA / ServiceNow Ticket" value={action.ticketNumber} />
                     <Detail label="Target Completion Date" value={dateOnly(action.targetCompletionDate)} />
                   </dl>
                 </article>

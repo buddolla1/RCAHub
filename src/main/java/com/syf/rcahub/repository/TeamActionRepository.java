@@ -24,7 +24,7 @@ public class TeamActionRepository {
     public List<TeamAction> findByIncidentId(long incidentId) {
         String sql = """
                 SELECT id, rca_incident_id, team_name, learnings, corrective_actions,
-                       target_completion_date, created_at, updated_at
+                       ticket_number, target_completion_date, created_at, updated_at
                 FROM rca_team_action
                 WHERE rca_incident_id = :incidentId
                 ORDER BY FIELD(team_name, 'Dev', 'QA', 'RTS', 'Program Management', 'Release Management')
@@ -42,9 +42,9 @@ public class TeamActionRepository {
 
         String sql = """
                 INSERT INTO rca_team_action (
-                    rca_incident_id, team_name, learnings, corrective_actions, target_completion_date
+                    rca_incident_id, team_name, learnings, corrective_actions, ticket_number, target_completion_date
                 ) VALUES (
-                    :incidentId, :teamName, :learnings, :correctiveActions, :targetCompletionDate
+                    :incidentId, :teamName, :learnings, :correctiveActions, :ticketNumber, :targetCompletionDate
                 )
                 """;
         MapSqlParameterSource[] batch = actions.stream()
@@ -53,6 +53,7 @@ public class TeamActionRepository {
                         .addValue("teamName", action.teamName())
                         .addValue("learnings", action.learnings())
                         .addValue("correctiveActions", action.correctiveActions())
+                        .addValue("ticketNumber", action.ticketNumber())
                         .addValue("targetCompletionDate", action.targetCompletionDate()))
                 .toArray(MapSqlParameterSource[]::new);
         jdbcTemplate.batchUpdate(sql, batch);

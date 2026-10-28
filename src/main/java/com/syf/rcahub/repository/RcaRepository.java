@@ -22,7 +22,9 @@ public class RcaRepository {
             priority, tower, application, program_manager, art_team_name, issue_description,
             release_datetime, rollback_status, incident_start_time, incident_end_time,
             impacted_system, business_impact, root_cause, rca_type, remedy_used, detection_point,
-            preventive_actions, rca_status, created_at, updated_at
+            preventive_actions, rca_status, rca_category, portfolio_name, detection_point_detail,
+            impacted_systems, resolution, root_cause_issues, root_cause_other_detail, review_type,
+            created_at, updated_at
             """;
 
     private static final Map<String, String> SORT_COLUMNS = Map.ofEntries(
@@ -51,13 +53,17 @@ public class RcaRepository {
                     priority, tower, application, program_manager, art_team_name, issue_description,
                     release_datetime, rollback_status, incident_start_time, incident_end_time,
                     impacted_system, business_impact, root_cause, rca_type, remedy_used,
-                    detection_point, preventive_actions, rca_status
+                    detection_point, preventive_actions, rca_status, rca_category, portfolio_name,
+                    detection_point_detail, impacted_systems, resolution, root_cause_issues,
+                    root_cause_other_detail, review_type
                 ) VALUES (
                     :serialNumber, :incidentNumber, :incidentMonth, :incidentYear, :changeTicket,
                     :priority, :tower, :application, :programManager, :artTeamName, :issueDescription,
                     :releaseDatetime, :rollbackStatus, :incidentStartTime, :incidentEndTime,
                     :impactedSystem, :businessImpact, :rootCause, :rcaType, :remedyUsed,
-                    :detectionPoint, :preventiveActions, :rcaStatus
+                    :detectionPoint, :preventiveActions, :rcaStatus, :rcaCategory, :portfolioName,
+                    :detectionPointDetail, :impactedSystems, :resolution, :rootCauseIssues,
+                    :rootCauseOtherDetail, :reviewType
                 )
                 """;
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -94,7 +100,15 @@ public class RcaRepository {
                     remedy_used = :remedyUsed,
                     detection_point = :detectionPoint,
                     preventive_actions = :preventiveActions,
-                    rca_status = :rcaStatus
+                    rca_status = :rcaStatus,
+                    rca_category = :rcaCategory,
+                    portfolio_name = :portfolioName,
+                    detection_point_detail = :detectionPointDetail,
+                    impacted_systems = :impactedSystems,
+                    resolution = :resolution,
+                    root_cause_issues = :rootCauseIssues,
+                    root_cause_other_detail = :rootCauseOtherDetail,
+                    review_type = :reviewType
                 WHERE id = :id
                 """;
         return jdbcTemplate.update(sql, parameters(request).addValue("id", id));
@@ -180,7 +194,7 @@ public class RcaRepository {
     private MapSqlParameterSource parameters(RcaRequest request) {
         return new MapSqlParameterSource()
                 .addValue("serialNumber", request.serialNumber())
-                .addValue("incidentNumber", request.incidentNumber().trim())
+                .addValue("incidentNumber", normalize(request.incidentNumber()))
                 .addValue("incidentMonth", request.incidentMonth())
                 .addValue("incidentYear", request.incidentYear())
                 .addValue("changeTicket", request.changeTicket())
@@ -201,7 +215,19 @@ public class RcaRepository {
                 .addValue("remedyUsed", request.remedyUsed())
                 .addValue("detectionPoint", request.detectionPoint())
                 .addValue("preventiveActions", request.preventiveActions())
-                .addValue("rcaStatus", request.rcaStatus());
+                .addValue("rcaStatus", request.rcaStatus())
+                .addValue("rcaCategory", request.rcaCategory())
+                .addValue("portfolioName", request.portfolioName())
+                .addValue("detectionPointDetail", request.detectionPointDetail())
+                .addValue("impactedSystems", request.impactedSystems())
+                .addValue("resolution", request.resolution())
+                .addValue("rootCauseIssues", request.rootCauseIssues() == null ? null : String.join("|", request.rootCauseIssues()))
+                .addValue("rootCauseOtherDetail", request.rootCauseOtherDetail())
+                .addValue("reviewType", request.reviewType());
+    }
+
+    private String normalize(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 
     private record QueryParts(String whereClause, MapSqlParameterSource parameters) {
